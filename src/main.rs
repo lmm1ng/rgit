@@ -3,10 +3,9 @@ use rgit;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let git_config = rgit::find_outer_config();
-    match git_config {
-        Ok(config) => rgit::apply_config(config),
-        Err(_) => ()
+    if let Ok(git_config) = rgit::find_outer_config() {
+        rgit::apply_config(git_config).ok();
     };
+
     rgit::exec_git(&args).unwrap();
 }

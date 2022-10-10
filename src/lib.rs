@@ -23,19 +23,21 @@ fn find_inner_config() -> Result<String, std::io::Error> {
     fs::read_to_string(".git/config")
 }
 
-pub fn apply_config (config: String) {
+pub fn apply_config (config: String) -> Result<(), Box<dyn Error>> {
     let local_config = find_inner_config().unwrap_or("".to_string());
     if local_config == "".to_string() {
-        let config_email = get_gitconfig_value(&config, "user", "email");
-        let config_user = get_gitconfig_value(&config, "user", "name");
+        let need_to_apply = ["user.name", "user.email"];
+        for field in need_to_apply {
+            let prefix_key: Vec<&str> = field.split(".").collect();
+            let old_val = get_gitconfig_value(&local_config, prefix_key[0], prefix_key[1]);
+            let new_val = get_gitconfig_value(&config, prefix_key[0], prefix_key[1]);
 
-        if  config_email != get_gitconfig_value(&local_config, "user", "email") {
-            exec_gitconfig_config("user.email", config_email).unwrap();
-        }
-        if  config_user != get_gitconfig_value(&local_config, "user", "name") {
-            exec_gitconfig_config("user.name", config_user).unwrap();
+            if old_val != new_val {
+                exec_gitconfig_config(field, new_val)?
+            }
         }
     }
+    Ok(())
 }
 
 fn get_gitconfig_value<'a>(config: &'a str, prefix: &'a str, key: &'a str) -> &'a str {
