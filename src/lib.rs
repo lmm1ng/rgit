@@ -26,7 +26,7 @@ fn find_inner_config() -> Result<String, std::io::Error> {
 
 pub fn apply_config (config: String) -> Result<(), Box<dyn Error>> {
     let local_config = find_inner_config().unwrap_or("".to_string());
-    let need_to_apply = ["user.name", "user.email"];
+    let need_to_apply = ["user.name", "user.email", "core.sshCommand"];
     for field in need_to_apply {
         let prefix_key: Vec<&str> = field.split(".").collect();
 
